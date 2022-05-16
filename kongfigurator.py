@@ -51,7 +51,7 @@ parser.add_argument('-o', '--outfile', default="kong.yaml", help="Name of file t
 parser.add_argument('-s', '--services', type=int, default=1, help="number of services you want [1-100, default 1])")
 parser.add_argument('-r', '--routes', type=int, default=1, help="number of routes PER service [1-100, default 1]")
 parser.add_argument('-c', '--consumers', type=int, default=0, help="number of consumers [1-100, default 0]")
-parser.add_argument('-t', '--tags', help="number of tags to")
+# parser.add_argument('-t', '--tag', help="tag to add to all entities")
 # parser.add_argument('-u', '--add-upstream', action="store_true", help="add preset upstream to config (default ws only)")
 # parser.add_argument('-p', '--plugins', nargs='*', help="space-separated list of plugins to include. Supported plugins are: [TBD]")
 # parser.add_argument('-a', '--admins', type=int, choices=range(1, 5), help="number of admins to add per workspace [1-5, default is 1]")
@@ -59,7 +59,7 @@ parser.add_argument('-t', '--tags', help="number of tags to")
 
 args = parser.parse_args()
 
-if args.services > 100 or args.routes > 100:
+if args.services > 1000 or args.routes > 1000:
     print("Please respect my rules! 100 or less, route or service.")
     exit(1)
 
