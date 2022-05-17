@@ -14,11 +14,11 @@ optional arguments:
   -o OUTFILE, --outfile OUTFILE
                         Name of file to write to.
   -s SERVICES, --services SERVICES
-                        number of services you want [1-100, default 1])
+                        number of services you want (default is 1)
   -r ROUTES, --routes ROUTES
-                        number of routes PER service [1-100, default 1]
+                        number of routes PER service (default is 1)
   -c CONSUMERS, --consumers CONSUMERS
-                        number of consumers [1-100, default 0]
+                        number of consumers (default is 0)
   ```
 
 These will expand and perhaps change soon. Always use `./kongfigurator.py -h` to get the latest options.
