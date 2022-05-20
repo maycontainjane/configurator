@@ -6,7 +6,7 @@ import random
 import string
 import logging
 
-SUPPORTED_PLUGINS = []
+SUPPORTED_PLUGINS = ["request-size-limiting", "basic-auth"]
 services = []
 routes = []
 consumers = []
@@ -61,14 +61,36 @@ def create_consumer(write_file, tag):
       tags: [{tag}]'''.format(name=name, tag=tag))
     consumers.append(name)
 
-# def add_request_size_limiting_plugin(write_file, tag):
+def add_request_size_limiting_plugin(write_file, request_limit, tag):
+    service = random.choice(services)
+    write_file.write('''
+    - name: rate-limiting
+      service: {service}
+      config: 
+        second: 5
+        hour: {request_limit}
+        policy: local
+        fault_tolerant: true
+        hide_client_headers: false
+        redis_ssl: false
+        redis_ssl_verify: false
+      tags: [{tag}]'''.format(service=service, request_limit=request_limit, tag=tag))
+
+def add_basic_auth_plugin(write_file, tag):
+    service = random.choice(services)
+    write_file.write('''
+    - name: basic-auth
+      service: {service}
+      config: 
+        hide_credentials: true
+      tags: [{tag}]'''.format(service=service, tag=tag))
 
 
 def get_args():
     parser = argparse.ArgumentParser(description='feed me your desired config')
     parser.add_argument('-o', '--outfile', default="kong.yaml", help="Name of file to write to.")
-    parser.add_argument('-s', '--services', type=int, default=0, help="number of services you want (default is 0)")
-    parser.add_argument('-r', '--routes', type=int, default=0, help="number of routes PER service (default is 0)")
+    parser.add_argument('-s', '--services', type=int, default=1, help="number of services you want (default is 1)")
+    parser.add_argument('-r', '--routes', type=int, default=1, help="number of routes PER service (default is 1)")
     parser.add_argument('-c', '--consumers', type=int, default=0, help="number of consumers (default is 0)")
     parser.add_argument('-t', '--tag', default="test", help="tag to add to all entities (default is 'test')")
     parser.add_argument('-p', '--plugins', nargs='*', default=[], help="space-separated list of plugins to include. Supported plugins are: {plugins}".format(plugins=SUPPORTED_PLUGINS))
@@ -109,8 +131,17 @@ if __name__ == "__main__":
         logging.debug('Consumers list: {}'.format(consumers))
 
 
+        if len(args.plugins) > 0:
+            config_file.write('\nplugins:')
+            # set vars for plugins
+            hour_limit = 10
+
         for plugin in args.plugins:
             if plugin == "request-size-limiting":
-                add_request_size_limiting_plugin(config_file, args.tag)
+                add_request_size_limiting_plugin(config_file, hour_limit, args.tag)
+                logging.info('Added Request Size Limiter Plugin to config. Limit is {hour_limit} requests per hour.'.format(hour_limit=hour_limit))
+            elif plugin == "basic-auth":
+                add_basic_auth_plugin(config_file, args.tag)
+                logging.info('Added Basic Auth Plugin to config.')
             else:
                 logging.error('Plugin {plugin} not supported. Currently supported plugins are: {plugins}'.format(plugin=plugin, plugins=SUPPORTED_PLUGINS))
